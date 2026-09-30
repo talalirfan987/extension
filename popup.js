@@ -138,3 +138,143 @@ Apply the selected tone below while preserving the original meaning.`;
       if (!state.sessionWarningShown) {
         state.sessionWarningShown = true;
         showError("Chrome could not keep your draft for this session. Keep the popup open and copy your result before closing it.");
+      }
+    });
+    return state.sessionWrites;
+  }
+
+  function invalidateOutput() {
+    ui.outputText.value = "";
+    resetCopy();
+    refreshControls();
+  }
+
+  function normalizeModel(value) {
+    return value.trim().replace(/^models\//, "");
+  }
+
+  function validModel(value) {
+    return /^gemini-[a-z0-9][a-z0-9._-]{0,99}$/.test(value);
+  }
+
+  function validKey(value) {
+    // Avoid assuming a key prefix or fixed length; Google can change formats.
+    return value.length > 0 && value.length <= 512 && /^[\x21-\x7E]+$/.test(value);
+  }
+
+  async function saveSettings(event) {
+    event.preventDefault();
+    if (!state.ready || state.busy || state.saving) return;
+    clearNotices();
+    const key = ui.apiKey.value.trim();
+    const model = normalizeModel(ui.modelName.value);
+    if (!validKey(key)) {
+      showError("Paste your complete Gemini API key without spaces or line breaks.");
+      ui.apiKey.focus();
+      return;
+    }
+    if (!validModel(model)) {
+      showError("Enter a Gemini model ID, such as gemini-3.5-flash-lite. Do not paste a URL.");
+      ui.modelName.focus();
+      return;
+    }
+    state.saving = true;
+    refreshControls();
+    try {
+      await chrome.storage.local.set({ [KEYS.apiKey]: key, [KEYS.model]: model });
+      state.apiKey = key;
+      state.model = model;
+      showNotice("Settings saved. Your key will be checked when you convert a message.");
+    } catch {
+      showError("Chrome could not save your settings. Try again or reopen the extension.");
+    } finally {
+      state.saving = false;
+      refreshControls();
+    }
+    if (state.apiKey === key && state.model === model && ui.errorBox.hidden) setSettings(false);
+  }
+
+  async function removeKey() {
+    if (state.busy || state.saving || !state.apiKey) return;
+    state.saving = true;
+    refreshControls();
+    try {
+      await chrome.storage.local.remove(KEYS.apiKey);
+      state.apiKey = "";
+      ui.apiKey.value = "";
+      ui.apiKey.type = "password";
+      ui.showKeyButton.textContent = "Show";
+      ui.showKeyButton.setAttribute("aria-pressed", "false");
+      ui.showKeyButton.setAttribute("aria-label", "Show API key");
+      showNotice("API key removed from this Chrome profile.");
+    } catch {
+      showError("Chrome could not remove the key. Please try again.");
+    } finally {
+      state.saving = false;
+      refreshControls();
+    }
+  }
+
+  function apiError(status, payload) {
+    const error = payload?.error;
+    // Inspect structured reasons without displaying Google's raw response or key.
+    const reasons = Array.isArray(error?.details) ? error.details.map((entry) => entry?.reason).filter(Boolean) : [];
+    if (reasons.some((reason) => /API_KEY|CREDENTIAL/.test(reason))) {
+      return "Google rejected this API key. Create or check your key in AI Studio, then update Settings.";
+    }
+    if (status === 400 && /api.?key/i.test(error?.message || "")) {
+      return "Google rejected this API key. Copy a valid key from AI Studio into Settings.";
+    }
+    if (status === 401 || status === 403) return "Google denied access. Check your API key, API restrictions, project permissions, and regional availability in AI Studio.";
+    if (status === 404) return "This Gemini model is unavailable for your account. Choose an available text model in Settings.";
+    if (status === 429) return "Google’s request or quota limit was reached. Wait before trying again, or check your model’s limits in AI Studio.";
+    if (status === 400) return "Google rejected the request. Check the model ID and your project’s free-tier availability or billing settings in AI Studio.";
+    if (status === 408 || status === 504) return "Google took too long to respond. Try again with a shorter message.";
+    if (status >= 500) return "Gemini is temporarily unavailable. Please try again shortly.";
+    return `Google could not complete the request (HTTP ${status}). Check your AI Studio project and try again.`;
+  }
+
+  function extractMessage(payload) {
+    if (payload?.promptFeedback?.blockReason) throw new UserError("Gemini declined this message. Rephrase it and try again.");
+    const candidate = Array.isArray(payload?.candidates) ? payload.candidates[0] : null;
+    if (!candidate) throw new UserError("Gemini returned no message. Please try again.");
+    if (candidate.finishReason === "MAX_TOKENS") throw new UserError("Gemini’s response was cut short. Shorten your message or try another model.");
+    if (candidate.finishReason !== "STOP") throw new UserError("Gemini did not return a complete message. Rephrase your input and try again.");
+    const parts = candidate.content?.parts;
+    const message = (Array.isArray(parts) ? parts : [])
+      .filter((part) => part && typeof part.text === "string" && part.thought !== true)
+      .map((part) => part.text).join("").trim();
+    if (!message) throw new UserError("Gemini returned an empty message. Please try again.");
+    if (message.length > MAX_OUTPUT) throw new UserError("The response was unexpectedly long. Shorten the source message and try again.");
+    return message;
+  }
+
+  async function convert(event, mode = "translate") {
+    event?.preventDefault();
+    if (!state.ready || state.busy || state.saving || state.settingsOpen) return;
+    clearNotices();
+    const source = ui.inputText.value.trim();
+    if (!source) {
+      showError("Type a message first. Roman Urdu, Urdu, and rough English all work.");
+      ui.inputText.focus();
+      return;
+    }
+    if (source.length > MAX_INPUT) {
+      showError("Please keep your message within 3,000 characters.");
+      ui.inputText.focus();
+      return;
+    }
+    if (!state.apiKey) {
+      setSettings(true);
+      showError("Add your Gemini API key, then save settings to start converting.");
+      return;
+    }
+    invalidateOutput();
+    state.busy = true;
+    const controller = new AbortController();
+    state.controller = controller;
+    let timedOut = false;
+    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, TIMEOUT_MS);
+    refreshControls();
+    announce("Converting your message. Keep the popup open.");
+    void persistDraft();
