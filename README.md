@@ -53,3 +53,58 @@ The request still goes directly from `popup.js` to Gemini’s `v1beta/models/...
 5. Read the result and confirm the meaning, names, and dates. Click **Copy**, wait for **Copied!**, and paste wherever you want to send it.
 6. Edit the input or switch tone to clear the previous result, then convert again. Click **Clear** to remove both the current draft and result.
 
+Example input:
+
+> Ashhad bhai backend mostly complete hai API slow hai us par kam kar raha hon
+
+An appropriate professional rewrite:
+
+> Ashhad, the backend is mostly complete. The API is slow, and I’m working on it.
+
+This is an illustration, not a recorded live API response. Exact wording varies. The prompt instructs the model to preserve uncertainty and status, and never invent a deadline or promise.
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| `manifest.json` | MV3 configuration, permissions, icons, and content security policy |
+| `popup.html` | Accessible popup and settings forms |
+| `popup.css` | Local CSS, focus states, responsive controls, and reduced-motion support |
+| `popup.js` | Settings, Gemini requests, tone prompts, validation, cancellation, and copying |
+| `icons/icon16.png`, `icon32.png`, `icon48.png`, `icon128.png` | Bundled extension icons |
+| `README.md` | This installation and usage guide |
+| `TESTING.md` | Verification notes and manual acceptance checks |
+| `tests/popup.test.cjs` | Runnable offline regression tests using Node’s built-in test runner |
+
+No API keys or example credentials are included. Supplying your own real key in Settings is the only credential setup required.
+
+## Data and security
+
+- **Local settings:** Only the API key, model ID, and tone preference are stored persistently in `chrome.storage.local`. This is local browser storage, not encryption or an operating-system secret vault. The extension restricts access to its own trusted contexts with `setAccessLevel`.
+- **Temporary messages:** The current draft and result are kept in `chrome.storage.session`, which is memory-backed and is cleared when Chrome restarts or the extension is disabled, reloaded, or updated. They survive closing and reopening the popup within the same browser session. **Clear** overwrites the stored draft and result with empty text.
+- **Google requests:** Clicking Convert sends the source text plus editing/tone instructions to Google over HTTPS and authenticates using your key. There is no telemetry, analytics, chat history service, or additional backend.
+- **Google handling:** The API service has its own data terms. Google’s free-tier content may be used to improve products. Review [Gemini API terms](https://ai.google.dev/gemini-api/terms) before sending confidential work material.
+- **Permissions:** `storage` saves settings and the temporary draft. `clipboardWrite` enables the Copy button; no clipboard-read permission is requested. The single host permission allows requests to `generativelanguage.googleapis.com`. Content scripts run on HTTP/HTTPS pages to offer inline editing. A background worker calls Gemini. No remote scripts/fonts are loaded.
+- **Output:** Model responses are assigned as textarea values, never rendered as HTML. Incomplete, blocked, malformed, and empty API responses do not become copyable results. Raw API error bodies and credentials are not logged or displayed.
+- **Distribution:** This design is for users bringing their own keys. Never bundle a shared company/developer key in an extension. A service using a shared secret needs an authenticated backend and server-side quota enforcement.
+
+## Popup lifecycle
+
+Chrome closes an action popup when you click outside it. Because this implementation intentionally calls Gemini inside `popup.js`, conversion stops being awaited if the popup closes. Reopen it to recover the latest saved draft and convert again. A request already received by Google may still consume quota even if you cancel or close the popup. The extension performs no automatic retries or model fallback, avoiding unintended extra requests.
+
+## Troubleshooting
+
+| Problem | What to do |
+| --- | --- |
+| “Manifest file is missing or unreadable” | Extract the ZIP and load the folder that directly contains `manifest.json`. Keep all included files together. |
+| “Could not open Chrome extension storage” | Open the popup from Chrome’s toolbar after loading the unpacked extension. Update Chrome if necessary. |
+| Missing API key | Open Settings, paste your key, and Save settings. |
+| Invalid key / access denied | Check or create a key in AI Studio. Check project permissions, API restrictions, and supported regions. For an older unrestricted key, follow Google’s key migration/restriction guidance. Do not remove security restrictions just to suppress an error. |
+| Model unavailable / HTTP 404 | Select an available Gemini text model in Settings. Do not use the retired `gemini-1.5-flash`. |
+| Rate/quota limit / HTTP 429 | Wait before retrying and check AI Studio’s model/project limits. A key does not guarantee free quota for every model. |
+| HTTP 400 | Check the model ID and project’s free-tier eligibility/billing status. The extension does not enable billing. |
+| Network error | Check your connection, VPN, firewall, or access to Google’s API. |
+| 45-second timeout | Retry with a shorter message or a faster model. |
+| Blocked, empty, or incomplete result | Rephrase or shorten the message and convert again. |
+| Copy fails | The extension selects the output. Press Ctrl+C or ⌘+C manually. |
+| Popup closes during conversion | Reopen it; the saved draft should be present. Keep it open for the next conversion. |
