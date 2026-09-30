@@ -108,3 +108,53 @@ Chrome closes an action popup when you click outside it. Because this implementa
 | Blocked, empty, or incomplete result | Rephrase or shorten the message and convert again. |
 | Copy fails | The extension selects the output. Press Ctrl+C or ⌘+C manually. |
 | Popup closes during conversion | Reopen it; the saved draft should be present. Keep it open for the next conversion. |
+| Code changes do not appear | Click the extension card’s Reload button at `chrome://extensions`, then reopen the popup. This resets temporary drafts. |
+
+To remove only your key, use **Settings → Remove key**. This removes the saved key from Chrome; it does not revoke the key at Google. Revoke it in AI Studio if needed. To uninstall, use **Remove** on the extension card at `chrome://extensions`.
+
+## Official references
+
+Documentation checked September 30, 2026:
+
+- [Gemini generateContent API](https://ai.google.dev/api/generate-content)
+- [Gemini API keys](https://ai.google.dev/gemini-api/docs/api-key)
+- [Gemini models](https://ai.google.dev/gemini-api/docs/models)
+- [Gemini pricing and free-tier data usage](https://ai.google.dev/gemini-api/docs/pricing)
+- [Chrome extension storage](https://developer.chrome.com/docs/extensions/reference/api/storage)
+- [Chrome cross-origin requests](https://developer.chrome.com/docs/extensions/develop/concepts/network-requests/)
+
+
+## In-chat English assistant (1.1.0)
+
+Reload ط at `chrome://extensions`, then refresh your chat tabs. Save your Gemini key once in the existing popup Settings. In WhatsApp Web or another website, focus a text field, write rough English or Roman Urdu, and click **Change to English** (or **Alt + Shift + E**). Review the preview and click **Use this message** to replace the draft. Send it yourself as usual.
+
+Only the selected field's draft is sent to Google when you click Fix. No automatic keystroke uploads or chat-history collection. API keys remain in the trusted extension context. Editing the draft or switching fields invalidates pending suggestions. Inline drafts are not stored by the extension. Password and sensitive autocomplete fields are excluded.
+
+Supports ordinary text inputs, textareas and standard contenteditable editors. Some custom editors may require manually copying the preview. Browser internal pages, closed shadow-root editors, desktop apps and mobile WhatsApp are not supported. This is an on-demand correction assistant, not automatic red underlining while typing.
+
+
+## ط 1.2.0
+
+Two separate actions are available in the popup and in web chat fields:
+- **Change to English** translates Roman Urdu/Urdu into English (Alt + Shift + E in chats).
+- **Fix mistakes** fixes spelling and grammar in the original language, including Roman Urdu, without translating (Alt + Shift + F in chats).
+
+The new cream and forest-green interface uses a compact chat card with a preview and **Use this message**. Reload the extension and refresh web pages after updating. Existing saved keys and preferences are retained.
+
+
+## Urdu voice → English (1.3.0)
+
+Reload the extension and refresh your HTTPS chat page. Focus its message box, click **Speak Urdu → English**, allow the browser's microphone permission, and speak Urdu. Click **Stop & translate** (recording also stops after 60 seconds). Review the recognized Urdu and translated English, then click **Use this message** to replace the current draft. Save your Gemini key in Settings first.
+
+Speech uses the browser's Web Speech recognition service with `ur-PK`; audio may be processed by that service. Recognized text is sent to Gemini for translation. The extension does not store recordings. Microphone availability, Urdu support and speech service access depend on the browser; Chrome on HTTPS is recommended. Site/iframe microphone restrictions may prevent recording. Denied permission, missing microphones, no speech and network errors are shown in the card. Closing the card, changing the draft/field, hiding the tab or leaving the page aborts recording. Voice starts only from the mic button.
+
+Automatic typing correction remains unimplemented pending the separate approval discussed previously; voice translation is a user-started action.
+
+Speech API references: [SpeechRecognition.start](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/start), [recognition language](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/lang).
+
+
+## ط — website launcher (1.4.0)
+
+The extension is now named **ط** (the first letter of طلال). Reload it in Chrome and refresh existing website tabs. A compact button appears at the bottom-right of regular HTTP/HTTPS pages. Click it to open the assistant even when there is no editable field: its own draft box supports translation, same-language correction, Urdu voice input and copying the result. Focusing a supported page editor switches back to editing that field. Closing the assistant leaves the launcher available. Existing settings remain saved.
+
+Chrome restricts injection on internal pages (such as `chrome://`), the Chrome Web Store and some built-in viewers. Website access must be allowed in the extension's Chrome settings. Embedded frames show their assistant when an editable field is focused, avoiding duplicate launchers on every frame.
