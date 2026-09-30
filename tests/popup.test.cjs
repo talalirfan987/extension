@@ -278,3 +278,149 @@ test("session restoration and Clear preserve settings but remove message content
   await app.input("کام تقریباً مکمل ہے"); await app.tone("direct"); await app.submit();
   assert.equal(app.local[K.draft], undefined);
   const reopened = await mount({ local: app.local, session: app.session });
+  assert.equal(reopened.get("inputText").value, "کام تقریباً مکمل ہے");
+  assert.equal(reopened.get("outputText").value, "The backend is mostly complete.");
+  assert.equal(reopened.radios.find((r) => r.checked).value, "direct");
+  await reopened.get("clearButton").fire("click");
+  assert.equal(reopened.session[K.draft].input, "");
+  assert.equal(reopened.session[K.draft].output, "");
+  assert.equal(reopened.local[K.apiKey], TEST_KEY);
+});
+
+test("corrupted model, tone, and oversized session content are ignored", async () => {
+  const app = await mount({
+    local: { [K.apiKey]: TEST_KEY, [K.model]: "../../other-host", [K.tone]: "toString" },
+    session: { [K.draft]: { input: "a".repeat(3001), output: "stale", tone: "direct" } }
+  });
+  assert.equal(app.get("inputText").value, "");
+  await app.input("hello"); await app.submit();
+  assert.ok(app.calls[0].url.includes(MODEL));
+});
+
+for (const [status, pattern] of [[400, /rejected/], [401, /denied access/], [403, /denied access/], [404, /model is unavailable/], [429, /quota limit/], [500, /temporarily unavailable/], [503, /temporarily unavailable/], [504, /too long/]]) {
+  test(`HTTP ${status} produces a safe actionable error and restores controls`, async () => {
+    const app = await mount({ fetch: async () => response({ error: { message: TEST_KEY } }, status) });
+    await app.input("rough text"); await app.submit();
+    assert.match(app.get("errorBox").textContent, pattern);
+    assert.ok(!app.get("errorBox").textContent.includes(TEST_KEY));
+    assert.equal(app.get("outputText").value, "");
+    assert.equal(app.get("copyButton").disabled, true);
+    assert.equal(app.get("convertButton").disabled, false);
+    assert.equal(app.get("spinner").hidden, true);
+    assert.equal(app.calls.length, 1);
+  });
+}
+
+test("invalid-key error details are recognized without exposing the raw error", async () => {
+  const app = await mount({ fetch: async () => response({ error: { details: [{ reason: "API_KEY_INVALID" }], message: TEST_KEY } }, 400) });
+  await app.input("hello"); await app.submit();
+  assert.match(app.get("errorBox").textContent, /rejected this API key/);
+  assert.ok(!app.get("errorBox").textContent.includes(TEST_KEY));
+});
+
+test("network rejection and non-JSON responses are handled", async () => {
+  const app = await mount({ fetch: async () => { throw new TypeError("Network blocked"); } });
+  await app.input("hello"); await app.submit();
+  assert.match(app.get("errorBox").textContent, /Could not reach Gemini/);
+  app.setFetch(async () => ({ ok: true, status: 200, json: async () => { throw new SyntaxError("not JSON"); } }));
+  await app.submit();
+  assert.match(app.get("errorBox").textContent, /unreadable/);
+});
+
+for (const [name, payload, pattern] of [
+  ["blocked prompt", { promptFeedback: { blockReason: "SAFETY" } }, /declined/],
+  ["missing candidates", {}, /no message/],
+  ["empty text", { candidates: [{ finishReason: "STOP", content: { parts: [{ text: "   " }] } }] }, /empty/],
+  ["truncated text", { candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: "half a sentence" }] } }] }, /cut short/],
+  ["blocked candidate", { candidates: [{ finishReason: "SAFETY", content: { parts: [{ text: "partial" }] } }] }, /complete message/],
+  ["missing finish reason", { candidates: [{ content: { parts: [{ text: "unverified" }] } }] }, /complete message/]
+]) {
+  test(`${name} never becomes a copyable result`, async () => {
+    const app = await mount({ fetch: async () => response(payload) });
+    await app.input("hello"); await app.submit();
+    assert.match(app.get("errorBox").textContent, pattern);
+    assert.equal(app.get("copyButton").disabled, true);
+    assert.equal(app.get("outputText").value, "");
+  });
+}
+
+test("thought parts are excluded and valid final text parts are combined", async () => {
+  const app = await mount({ fetch: async () => response({ candidates: [{ finishReason: "STOP", content: { parts: [
+    { thought: true, text: "private reasoning" }, { text: "The work " }, { text: "is complete." }
+  ] } }] }) });
+  await app.input("work done"); await app.submit();
+  assert.equal(app.get("outputText").value, "The work is complete.");
+});
+
+function pendingRequest(_url, { signal }) {
+  return new Promise((_resolve, reject) => signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true }));
+}
+
+test("duplicate submits are ignored during loading; Cancel unlocks the popup", async () => {
+  const app = await mount({ fetch: pendingRequest });
+  await app.input("hello");
+  const pending = app.submit();
+  await settle();
+  assert.equal(app.get("spinner").hidden, false);
+  assert.equal(app.get("composerFields").disabled, true);
+  await app.submit();
+  assert.equal(app.calls.length, 1);
+  await app.get("cancelButton").fire("click"); await pending;
+  assert.match(app.get("noticeBox").textContent, /cancelled/);
+  assert.equal(app.get("inputText").value, "hello");
+  assert.equal(app.get("convertButton").disabled, false);
+});
+
+test("timeout aborts the fetch at 45 seconds and never auto-retries", async () => {
+  const app = await mount({ fetch: pendingRequest });
+  await app.input("hello");
+  const pending = app.submit(); await settle();
+  app.runTimer(45000); await pending;
+  assert.match(app.get("errorBox").textContent, /timed out after 45/);
+  assert.equal(app.calls.length, 1);
+  assert.equal(app.get("convertButton").disabled, false);
+});
+
+test("closing the popup aborts an active request", async () => {
+  const app = await mount({ fetch: pendingRequest });
+  await app.input("hello");
+  const pending = app.submit(); await settle();
+  await app.window.fire("pagehide"); await pending;
+  assert.equal(app.calls[0].request.signal.aborted, true);
+});
+
+test("Ctrl/Cmd+Enter submits, while IME composition and Settings prevent submission", async () => {
+  const app = await mount();
+  await app.input("hello");
+  await app.document.fire("keydown", { key: "Enter", ctrlKey: true, isComposing: true });
+  assert.equal(app.calls.length, 0);
+  await app.document.fire("keydown", { key: "Enter", ctrlKey: true });
+  assert.equal(app.calls.length, 1);
+  await app.get("settingsButton").fire("click");
+  await app.document.fire("keydown", { key: "Enter", metaKey: true });
+  assert.equal(app.calls.length, 1);
+  await app.document.fire("keydown", { key: "Escape" });
+  assert.equal(app.get("settingsView").hidden, true);
+});
+
+test("storage failures are visible and session failure does not block conversion", async () => {
+  const failed = await mount({ failRead: "local" });
+  assert.equal(failed.get("convertButton").disabled, true);
+  assert.match(failed.get("errorBox").textContent, /Chrome extension storage/);
+  const app = await mount({ failRead: "session" });
+  assert.match(app.get("errorBox").textContent, /draft storage is unavailable/);
+  await app.input("hello"); await app.submit();
+  assert.equal(app.get("outputText").value, "The backend is mostly complete.");
+});
+
+test("draft writes are serialized, so a slow first write cannot overwrite later text", async () => {
+  let release;
+  let first = true;
+  const app = await mount({ beforeWrite(area) {
+    if (area === "session" && first) { first = false; return new Promise((resolve) => { release = resolve; }); }
+  } });
+  await app.input("first version"); await app.input("latest version");
+  assert.equal(app.writes.length, 1);
+  release(); await settle();
+  assert.equal(app.session[K.draft].input, "latest version");
+});
