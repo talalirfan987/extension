@@ -88,3 +88,86 @@
       if (preview.length > 3000) { session.failed = true; stopVoice(false); $("status").textContent = "That recording is too long. Try a shorter message."; }
     };
     recognition.onerror = event => {
+      if (session.cancelled) return;
+      session.failed = true;
+      const errors = { "not-allowed": "Microphone access was denied. Allow it in this site's browser permissions and try again.", "audio-capture": "No microphone available. Connect or enable your microphone.", "no-speech": "No speech detected. Try again and speak clearly.", "network": "Speech service could not connect. Check your internet and try again.", "language-not-supported": "Urdu speech recognition is unavailable in this browser. Type Urdu instead.", "service-not-allowed": "The browser blocked its speech service. Try Google Chrome or type Urdu instead." };
+      $("status").textContent = errors[event.error] || "Voice recording stopped. Please try again.";
+    };
+    recognition.onend = () => {
+      clearTimeout(session.timer);
+      if (voiceSession !== session) return;
+      voiceSession = null; voiceControls(false);
+      if (session.cancelled || session.failed || revision !== session.revision || target !== session.field || !target.isConnected || read(target) !== session.draft) return;
+      if (!session.text) { $("status").textContent = "No speech detected. Click the mic and try again."; return; }
+      void rewrite("translate", session.text);
+    };
+    try { recognition.start(); session.timer = setTimeout(() => stopVoice(false), 60000); }
+    catch { stopVoice(); $("status").textContent = "Could not start the microphone. Check site permissions and try again."; }
+  };
+  window.addEventListener("pagehide", () => stopVoice());
+  document.addEventListener("visibilitychange", () => { if (document.hidden) stopVoice(); });
+  function editable(node) {
+    if (!(node instanceof Element)) return null;
+    let field = node.closest('textarea, input, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]');
+    if (!field || field.disabled || field.readOnly || field.closest('[inert], [contenteditable="false"]')) return null;
+    if (field instanceof HTMLInputElement && field.type !== "text") return null;
+    if (/password|cc-|one-time-code/.test(field.getAttribute("autocomplete") || "")) return null;
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) {
+      if (!field.isContentEditable) return null;
+      while (field.parentElement?.isContentEditable) field = field.parentElement;
+    }
+    return field;
+  }
+  const read = field => "value" in field ? field.value : field.innerText;
+  function reset() { stopVoice(); revision++; $("heard").hidden = true; $("result").hidden = true; $("copy").hidden = true; $("apply").hidden = true; $("status").textContent = "Your words, just a little clearer."; }
+  document.addEventListener("focusin", event => {
+    if (event.target === host) return;
+    const field = editable(event.target);
+    if (!field) { target = null; reset(); collapsePanel(); return; }
+    if (field !== target) { target = field; reset(); }
+    openPanel();
+  }, true);
+  document.addEventListener("input", event => { if (target && (event.target === target || target.contains(event.target))) reset(); }, true);
+  $("close").onclick = () => { reset(); collapsePanel(); $("launcher").focus(); };
+  async function rewrite(mode, spokenText = null) {
+    if (busy || !target?.isConnected) return;
+    const field = target;
+    snapshot = read(field);
+    const source = spokenText === null ? snapshot : spokenText;
+    if (!source.trim() || source.length > 3000) { $("status").textContent = "Enter a message of 1–3,000 characters."; return; }
+    reset(); const requestRevision = revision;
+    if (spokenText !== null) { $("heard").textContent = spokenText; $("heard").hidden = false; }
+    busy = true; $("voice").disabled = true; $("fix").disabled = $("translate").disabled = true; $("status").textContent = mode === "translate" ? "Finding the right English words…" : "Tidying up spelling and grammar…";
+    try {
+      const response = await chrome.runtime.sendMessage({ type: "bosscomm.correct", text: source, mode });
+      if (revision !== requestRevision || target !== field || !field.isConnected || read(field) !== snapshot) return;
+      if (response?.error) throw new Error(response.error);
+      if (!response?.text) throw new Error("No correction received. Try again.");
+      $("result").value = response.text; $("result").hidden = false; $("copy").hidden = false;
+      $("apply").hidden = field === $("scratch") || response.text === snapshot;
+      $("status").textContent = response.text === snapshot ? "Looks good — no changes needed." : "Ready. Review your message below.";
+    } catch (error) { if (revision === requestRevision) $("status").textContent = error.message || "Reload this page and try again."; }
+    finally { busy = false; $("voice").disabled = false; $("fix").disabled = $("translate").disabled = false; }
+  };
+  $("fix").onclick = () => rewrite("correct");
+  $("translate").onclick = () => rewrite("translate");
+  $("apply").onclick = () => {
+    const field = target, text = $("result").value;
+    if (!field?.isConnected || read(field) !== snapshot || !editable(field)) { reset(); $("status").textContent = "Your draft changed. Check it again."; return; }
+    field.focus();
+    if ("value" in field) {
+      const prototype = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(prototype, "value").set.call(field, text);
+      field.dispatchEvent(new InputEvent("input", { bubbles:true, inputType:"insertReplacementText", data:text }));
+    } else {
+      const selection = window.getSelection(), range = document.createRange();
+      range.selectNodeContents(field); selection.removeAllRanges(); selection.addRange(range);
+      // Use the browser editing path to preserve undo and notify rich-text editors.
+      if (!document.execCommand("insertText", false, text)) { $("status").textContent = "This editor does not support Apply. Copy the correction and paste it."; return; }
+    }
+    reset(); $("status").textContent = "Message updated. You’re ready to send.";
+  };
+  document.addEventListener("keydown", event => {
+    if (event.altKey && event.shiftKey && ["KeyE", "KeyF"].includes(event.code) && !event.isComposing && editable(event.target)) { event.preventDefault(); openPanel(); $(event.code === "KeyE" ? "translate" : "fix").click(); }
+  }, true);
+})();
