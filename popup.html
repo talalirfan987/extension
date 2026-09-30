@@ -68,3 +68,75 @@
               </fieldset>
 
               <button id="convertButton" class="button primary convert-button" type="submit" disabled>
+                <svg id="convertIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg>
+                <span id="spinner" class="spinner" aria-hidden="true" hidden></span>
+                <span id="convertLabel">Change to English</span>
+                <span class="button-arrow" aria-hidden="true">→</span>
+              </button>
+              <button id="fixMistakesButton" class="button secondary fix-mistakes" type="button">✓ Fix mistakes <span>Keep my language</span></button>
+            </fieldset>
+          </form>
+          <div class="request-meta">
+            <span id="requestHint">Shortcut: Ctrl / ⌘ + Enter</span>
+            <button id="cancelButton" type="button" class="text-button" hidden>Cancel</button>
+          </div>
+
+          <section id="outputSection" class="output-card" aria-labelledby="outputHeading" aria-busy="false">
+            <div class="section-heading">
+              <h2 id="outputHeading"><span class="status-dot" aria-hidden="true"></span>YOUR REFINED MESSAGE</h2>
+              <button id="copyButton" class="copy-button" type="button" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+                <span id="copyLabel">Copy</span>
+              </button>
+            </div>
+            <label for="outputText" class="sr-only">Refined English message</label>
+            <textarea id="outputText" rows="3" readonly dir="ltr" spellcheck="false" placeholder="A little polish, a lot more clarity. Your message will appear here." aria-describedby="reviewHint"></textarea>
+            <p id="reviewHint" class="hint">Review the wording before sending.</p>
+          </section>
+        </section>
+
+        <section id="settingsView" aria-labelledby="settingsHeading" hidden>
+          <div class="settings-heading">
+            <div><span class="eyebrow">MAKE IT YOURS</span><h2 id="settingsHeading">Connection settings</h2></div>
+            <button id="backButton" class="text-button" type="button">← Back</button>
+          </div>
+          <p class="settings-intro">Connect your own Gemini account to turn rough messages into workplace English.</p>
+          <form id="settingsForm" novalidate>
+            <label class="field-label" for="apiKey">Gemini API key</label>
+            <div class="password-field">
+              <input id="apiKey" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="512" placeholder="Paste your Gemini API key" aria-describedby="keyHint">
+              <button id="showKeyButton" type="button" class="text-button" aria-label="Show API key" aria-pressed="false">Show</button>
+            </div>
+            <p id="keyHint" class="hint">Saved in this Chrome profile. Never synced.</p>
+            <a class="external-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Get a Gemini API key <span aria-hidden="true">↗</span></a>
+
+            <label class="field-label model-label" for="modelName">Gemini model</label>
+            <input id="modelName" class="model-input" type="text" value="gemini-3.5-flash-lite" list="modelOptions" maxlength="128" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="modelHint">
+            <datalist id="modelOptions">
+              <option value="gemini-3.5-flash-lite">Fast · recommended</option>
+              <option value="gemini-3.8-flash">More capable</option>
+              <option value="gemini-3.1-flash-lite">Alternative</option>
+            </datalist>
+            <p id="modelHint" class="hint">Flash-Lite is a good fit for short messages. Availability and limits depend on your Google account.</p>
+            <div class="settings-actions">
+              <button id="saveSettingsButton" class="button primary" type="submit">Save settings</button>
+              <button id="removeKeyButton" class="button secondary" type="button" disabled>Remove key</button>
+            </div>
+          </form>
+          <div class="privacy-note">
+            <h3>Your data, at a glance</h3>
+            <p>Convert sends your message and selected tone directly to Google. The key is stored locally, not encrypted. Drafts stay in temporary browser-session storage; Clear removes the current draft and result.</p>
+            <p>Google’s free tier has usage limits and may use submitted content to improve its products.</p>
+            <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Google’s API terms <span aria-hidden="true">↗</span></a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span><span id="keyStatusDot" class="key-dot" aria-hidden="true"></span><span id="keyStatus">Loading settings…</span></span>
+        <span>Powered by Gemini</span>
+      </footer>
+      <p id="liveStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+    </div>
+  </body>
+</html>
