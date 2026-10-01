@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
   const mode = message.mode || "translate";
   if (!["translate", "correct"].includes(mode)) { reply({ error: "Choose a valid writing action." }); return; }
   const instruction = mode === "correct"
-    ? "Fix spelling, grammar, punctuation and typos only. Keep the original language and script: English stays English, Roman Urdu stays Roman Urdu, Urdu stays Urdu. Preserve code-switching. Roman Urdu has flexible spellings; correct clear mistakes only. Do not translate or formalize the message."
+    ? "Fix spelling, grammar, punctuation, capitalization and typos in the whole message. Keep the original language and script: English stays English, Roman Urdu stays Roman Urdu, Urdu stays Urdu. For Roman Urdu or mixed text, correct the Roman Urdu spelling and grammar into natural, consistent, properly written Roman Urdu, AND ALSO correct every English word or phrase inside it (spelling, grammar, capitalization) so both parts are right. Preserve code-switching; do not translate or formalize the message."
     : "Translate Urdu, Roman Urdu or mixed-language text into clear, natural English. If already English, polish its grammar and clarity.";
   const source = message.text;
   if (typeof source !== "string" || !source.trim() || source.length > 3000) {
