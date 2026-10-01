@@ -1,6 +1,6 @@
 # Verification
 
-Package: ط 1.0.0 · September 30, 2026
+Package: BossComm AI 1.0.0 · September 30, 2026
 
 ## Automated checks
 

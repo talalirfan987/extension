@@ -1,4 +1,4 @@
-# ط
+# BossComm AI
 
 A ready-to-load Chrome Manifest V3 extension that turns Roman Urdu, Urdu script, and rough English into clear workplace English. It uses your own Google Gemini API key. No build step, npm install, backend, or paid extension subscription is required to run it.
 
@@ -20,8 +20,8 @@ At the time this package was built (September 30, 2026), Google lists standard i
 4. Turn on **Developer mode** using the switch in the upper-right corner.
 5. Click **Load unpacked**.
 6. Select the **BossComm-AI** folder that directly contains `manifest.json`. Select the folder, not the ZIP or the `icons` folder.
-7. Chrome should show the ط extension card. Click the puzzle-piece **Extensions** button beside the address bar and pin **ط**.
-8. Click the ط icon to open its popup. Do not double-click `popup.html`; extension storage only works when Chrome loads it as an extension.
+7. Chrome should show the BossComm AI extension card. Click the puzzle-piece **Extensions** button beside the address bar and pin **BossComm AI**.
+8. Click the BossComm AI icon to open its popup. Do not double-click `popup.html`; extension storage only works when Chrome loads it as an extension.
 
 Chrome’s official walkthrough: [Load an unpacked extension](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked).
 
@@ -126,14 +126,14 @@ Documentation checked September 30, 2026:
 
 ## In-chat English assistant (1.1.0)
 
-Reload ط at `chrome://extensions`, then refresh your chat tabs. Save your Gemini key once in the existing popup Settings. In WhatsApp Web or another website, focus a text field, write rough English or Roman Urdu, and click **Change to English** (or **Alt + Shift + E**). Review the preview and click **Use this message** to replace the draft. Send it yourself as usual.
+Reload BossComm AI at `chrome://extensions`, then refresh your chat tabs. Save your Gemini key once in the existing popup Settings. In WhatsApp Web or another website, focus a text field, write rough English or Roman Urdu, and click **Change to English** (or **Alt + Shift + E**). Review the preview and click **Use this message** to replace the draft. Send it yourself as usual.
 
 Only the selected field's draft is sent to Google when you click Fix. No automatic keystroke uploads or chat-history collection. API keys remain in the trusted extension context. Editing the draft or switching fields invalidates pending suggestions. Inline drafts are not stored by the extension. Password and sensitive autocomplete fields are excluded.
 
 Supports ordinary text inputs, textareas and standard contenteditable editors. Some custom editors may require manually copying the preview. Browser internal pages, closed shadow-root editors, desktop apps and mobile WhatsApp are not supported. This is an on-demand correction assistant, not automatic red underlining while typing.
 
 
-## ط 1.2.0
+## BossComm AI 1.2.0
 
 Two separate actions are available in the popup and in web chat fields:
 - **Change to English** translates Roman Urdu/Urdu into English (Alt + Shift + E in chats).
@@ -153,8 +153,8 @@ Automatic typing correction remains unimplemented pending the separate approval 
 Speech API references: [SpeechRecognition.start](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/start), [recognition language](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/lang).
 
 
-## ط — website launcher (1.4.0)
+## BossComm AI — website launcher (1.4.0)
 
-The extension is now named **ط** (the first letter of طلال). Reload it in Chrome and refresh existing website tabs. A compact button appears at the bottom-right of regular HTTP/HTTPS pages. Click it to open the assistant even when there is no editable field: its own draft box supports translation, same-language correction, Urdu voice input and copying the result. Focusing a supported page editor switches back to editing that field. Closing the assistant leaves the launcher available. Existing settings remain saved.
+The extension is named **BossComm AI**. Reload it in Chrome and refresh existing website tabs. A compact button appears at the bottom-right of regular HTTP/HTTPS pages. Click it to open the assistant even when there is no editable field: its own draft box supports translation, same-language correction, Urdu voice input and copying the result. Focusing a supported page editor switches back to editing that field. Closing the assistant leaves the launcher available. Existing settings remain saved.
 
 Chrome restricts injection on internal pages (such as `chrome://`), the Chrome Web Store and some built-in viewers. Website access must be allowed in the extension's Chrome settings. Embedded frames show their assistant when an editable field is focused, avoiding duplicate launchers on every frame.

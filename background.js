@@ -18,9 +18,9 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
   (async () => {
     await ready;
     const saved = await chrome.storage.local.get(["bosscomm.apiKey", "bosscomm.model"]);
-    if (!saved["bosscomm.apiKey"]) throw new Error("Open ط Settings from the toolbar and save your Gemini API key first.");
+    if (!saved["bosscomm.apiKey"]) throw new Error("Open BossComm AI Settings from the toolbar and save your Gemini API key first.");
     const model = saved["bosscomm.model"] || "gemini-3.5-flash-lite";
-    if (!/^gemini-[a-z0-9][a-z0-9._-]{0,99}$/.test(model)) throw new Error("Check the model in ط Settings.");
+    if (!/^gemini-[a-z0-9][a-z0-9._-]{0,99}$/.test(model)) throw new Error("Check the model in BossComm AI Settings.");
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 25000);
     try {
