@@ -1,4 +1,4 @@
-/* BossComm AI — no build step, external scripts, or embedded credentials. */
+/* ط — no build step, external scripts, or embedded credentials. */
 "use strict";
 
 (() => {
@@ -22,7 +22,7 @@
       instruction: "Apologetic & Respectful: use considerate, measured wording. If the source describes a delay, absence, mistake, or inconvenience, include one appropriate brief apology. Never invent fault, guilt, excuses, compensation, or promises."
     }
   });
-  const SYSTEM_INSTRUCTION = `You are BossComm AI, a precise workplace English editor for a Pakistani user communicating with a boss, manager, teammate, or client.
+  const SYSTEM_INSTRUCTION = `You are ط, a precise workplace English editor for a Pakistani user communicating with a boss, manager, teammate, or client.
 Your only task is to rewrite the user's source message into clear, grammatically correct workplace English.
 Understand Roman Urdu, Urdu script, colloquial Hindi/Urdu, code-switching, broken English, abbreviations, phonetic spellings, and typos. Infer the intended meaning from the source before rewriting.
 Examples of language: "aj/aaj" means today, "kal" can mean yesterday or tomorrow depending on tense, "parson" is also tense-dependent, "abi/abhi" means now, "kam/kaam" means work, "ho gaya" means completed, "kar raha hon" means working on it, "tabiyat" means health, and "chutti" means leave. Do not confuse "kal" with a fixed date.
@@ -414,7 +414,7 @@ Apply the selected tone below while preserving the original meaning.`;
       refreshControls();
       ui.inputText.focus();
     } catch {
-      showError("Could not open Chrome extension storage. Load this folder through chrome://extensions, then reopen BossComm AI in Chrome 114 or later.");
+      showError("Could not open Chrome extension storage. Load this folder through chrome://extensions, then reopen ط in Chrome 114 or later.");
       ui.keyStatus.textContent = "Settings unavailable";
     }
   }

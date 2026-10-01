@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light">
-    <title>BossComm AI</title>
+    <title>ط</title>
     <link rel="stylesheet" href="popup.css">
     <script src="popup.js" defer></script>
   </head>
@@ -12,9 +12,9 @@
     <div class="app">
       <header class="header">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">B</span>
+          <span class="brand-mark" aria-hidden="true">✦</span>
           <div>
-            <h1>BossComm AI</h1>
+            <h1><span class="urdu-brand" lang="ur" dir="rtl">ط</span></h1>
             <p>Your words. A little clearer.</p>
           </div>
         </div>
@@ -29,10 +29,10 @@
         <section id="composerView" aria-label="Message converter">
           <div id="setupBanner" class="setup-banner" hidden>
             <span>Add your Gemini key to get started.</span>
-            <button id="setupButton" type="button" class="text-button">Set up</button>
+            <button id="setupButton" type="button" class="text-button">Set up <span aria-hidden="true">↗</span></button>
           </div>
 
-          <div class="intro-card"><span class="eyebrow">WRITE WITH CONFIDENCE</span><h2>Say it your way.</h2><p>Turn your thoughts into English, or simply tidy up mistakes.</p><span class="chat-tip">Speak Urdu to English directly inside your web chats</span></div>
+          <div class="intro-card"><span class="eyebrow">WRITE WITH CONFIDENCE</span><h2>Say it your way.</h2><p>Turn your thoughts into English, or simply tidy up mistakes.</p><span class="chat-tip">🎙 Speak Urdu → English directly inside your web chats</span></div>
           <form id="convertForm" novalidate>
             <fieldset id="composerFields" class="reset-fieldset" disabled>
               <legend class="sr-only">Compose your message</legend>
@@ -71,9 +71,9 @@
                 <svg id="convertIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg>
                 <span id="spinner" class="spinner" aria-hidden="true" hidden></span>
                 <span id="convertLabel">Change to English</span>
-                
+                <span class="button-arrow" aria-hidden="true">→</span>
               </button>
-              <button id="fixMistakesButton" class="button secondary fix-mistakes" type="button">Fix mistakes <span>Keep my language</span></button>
+              <button id="fixMistakesButton" class="button secondary fix-mistakes" type="button">✓ Fix mistakes <span>Keep my language</span></button>
             </fieldset>
           </form>
           <div class="request-meta">
@@ -98,7 +98,7 @@
         <section id="settingsView" aria-labelledby="settingsHeading" hidden>
           <div class="settings-heading">
             <div><span class="eyebrow">MAKE IT YOURS</span><h2 id="settingsHeading">Connection settings</h2></div>
-            <button id="backButton" class="text-button" type="button">Back</button>
+            <button id="backButton" class="text-button" type="button">← Back</button>
           </div>
           <p class="settings-intro">Connect your own Gemini account to turn rough messages into workplace English.</p>
           <form id="settingsForm" novalidate>
@@ -108,7 +108,7 @@
               <button id="showKeyButton" type="button" class="text-button" aria-label="Show API key" aria-pressed="false">Show</button>
             </div>
             <p id="keyHint" class="hint">Saved in this Chrome profile. Never synced.</p>
-            <a class="external-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Get a Gemini API key</a>
+            <a class="external-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Get a Gemini API key <span aria-hidden="true">↗</span></a>
 
             <label class="field-label model-label" for="modelName">Gemini model</label>
             <input id="modelName" class="model-input" type="text" value="gemini-3.5-flash-lite" list="modelOptions" maxlength="128" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="modelHint">
@@ -127,7 +127,7 @@
             <h3>Your data, at a glance</h3>
             <p>Convert sends your message and selected tone directly to Google. The key is stored locally, not encrypted. Drafts stay in temporary browser-session storage; Clear removes the current draft and result.</p>
             <p>Google’s free tier has usage limits and may use submitted content to improve its products.</p>
-            <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Google’s API terms</a>
+            <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Google’s API terms <span aria-hidden="true">↗</span></a>
           </div>
         </section>
       </main>
