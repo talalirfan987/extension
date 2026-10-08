@@ -4,9 +4,11 @@ const pending = new Set();
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
   if (sender.id !== chrome.runtime.id || !sender.tab || message?.type !== "bosscomm.correct") return;
   const mode = message.mode || "translate";
-  if (!["translate", "correct"].includes(mode)) { reply({ error: "Choose a valid writing action." }); return; }
-  const instruction = mode === "correct"
-    ? "Fix spelling, grammar, punctuation, capitalization and typos in the whole message. Keep the original language and script: English stays English, Roman Urdu stays Roman Urdu, Urdu stays Urdu. For Roman Urdu or mixed text, correct the Roman Urdu spelling and grammar into natural, consistent, properly written Roman Urdu, AND ALSO correct every English word or phrase inside it (spelling, grammar, capitalization) so both parts are right. Preserve code-switching; do not translate or formalize the message."
+  if (!["translate", "correct", "roman"].includes(mode)) { reply({ error: "Choose a valid writing action." }); return; }
+  const instruction = mode === "roman"
+    ? "Convert the message into correct, natural Roman Urdu: Urdu written in the Latin alphabet, the way Pakistanis naturally type it in chats (for example 'Aap kaise hain? Main kal meeting mein shamil nahi ho sakta.'). Translate English or Urdu script into Roman Urdu with proper Urdu grammar, word order and consistent, common spellings (hai, hain, nahi, aap, mein, kya, kyun, ke, ki, ka). Keep widely used English terms that Urdu speakers normally say in English (meeting, email, deadline, report, project, update, etc.) and spell them correctly. Keep names, numbers, links and code unchanged. Do not use Urdu/Arabic script and do not output English sentences. Keep the original tone and politeness."
+    : mode === "correct"
+    ? "Fix spelling, grammar, punctuation, capitalization and typos in the whole message. Keep the original language and script: English stays English, Roman Urdu stays Roman Urdu, Urdu stays Urdu. For Roman Urdu or mixed text, correct the Roman Urdu spelling and grammar into natural, consistent, properly written Roman Urdu, AND ALSO correct every English word or phrase inside it (spelling, grammar, capitalization) so both parts are right. Then improve the wording so the message reads naturally, clearly and politely, in a good professional-yet-friendly style, in the same language and script. Preserve code-switching; do not translate to another language and keep the original meaning."
     : "Translate Urdu, Roman Urdu or mixed-language text into clear, natural English. If already English, polish its grammar and clarity.";
   const source = message.text;
   if (typeof source !== "string" || !source.trim() || source.length > 3000) {

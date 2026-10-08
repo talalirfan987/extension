@@ -12,13 +12,13 @@
     .mark { width:38px; height:38px; display:grid; place-items:center; background:#185b49; color:#d9f4ad; border-radius:12px; font-size:24px; }
     button { font:inherit; cursor:pointer; transition:background .15s,transform .15s; } button:hover:not(:disabled) { transform:translateY(-1px); } button:disabled { opacity:.55; cursor:wait; } button:focus-visible,textarea:focus-visible { outline:3px solid #90b75d; outline-offset:3px; }
     #close { border:0; background:transparent; color:#74857e; font-size:23px; padding:0 5px; }
-    .actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:15px; } .action { text-align:left; border:1px solid #dce6e2; border-radius:14px; background:#eef4f0; color:#214c3e; padding:13px 11px; } .action.primary { background:#185b49; color:white; border-color:#185b49; } .action b { display:block; font-size:12px; margin:7px 0 2px; } .action small { display:block; font-size:10px; opacity:.8; } .symbol { font-size:19px; }
+    .actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-top:15px; } .action { text-align:left; border:1px solid #dce6e2; border-radius:14px; background:#eef4f0; color:#214c3e; padding:13px 11px; } .action.primary { background:#185b49; color:white; border-color:#185b49; } .action b { display:block; font-size:12px; margin:7px 0 2px; } .action small { display:block; font-size:10px; opacity:.8; } .symbol { font-size:19px; }
     textarea { width:100%; min-height:110px; max-height:200px; margin:12px 0 8px; padding:12px; resize:vertical; font:14px/1.7 system-ui,sans-serif; color:#183c34; background:#fff; border:1px solid #dce6e2; border-radius:12px; }
     #voice { width:100%; margin-top:10px; border:1px solid #cbdcbd; border-radius:12px; padding:11px; background:#eaf2df; color:#28543d; font-weight:650; } #voice[aria-pressed="true"] { background:#fff0ea; color:#a34229; border-color:#e9b6a3; } #heard { margin:10px 0 0; font-size:12px; color:#61776d; white-space:pre-wrap; overflow-wrap:anywhere; max-height:100px; overflow:auto; }
     #apply { width:100%; border:0; border-radius:11px; padding:10px; background:#dff0c3; color:#25421c; font-weight:650; }
     #status { margin:13px 0 0; font-size:12px; color:#61776d; } .foot { margin:14px 0 0; padding-top:10px; border-top:1px solid #e5ece7; color:#7b8c83; font-size:10px; }
     @media(prefers-reduced-motion:reduce) { button { transition:none; } button:hover:not(:disabled) { transform:none; } }
-  </style><button id="launcher" aria-expanded="false" aria-controls="panel" aria-label="Open writing assistant">✦ ط</button><section id="panel" class="box" hidden aria-label="ط writing assistant"><div class="row"><span class="mark" aria-hidden="true">✦</span><div class="identity"><strong><span lang="ur" dir="rtl">ط</span></strong><span class="tag">A little help with words</span></div><button id="close" aria-label="Close assistant">×</button></div><div id="scratch-area" hidden><label id="scratch-label" for="scratch">Write or speak a message on any page</label><textarea id="scratch" dir="auto" maxlength="3000" placeholder="Type English or Roman Urdu…"></textarea></div><div class="actions"><button id="translate" class="action primary" title="Alt + Shift + E"><span class="symbol" aria-hidden="true">A ↗</span><b>Change to English</b><small>English mein badlein</small></button><button id="fix" class="action" title="Alt + Shift + F"><span class="symbol" aria-hidden="true">✓</span><b>Fix mistakes</b><small>Isi zubaan mein theek karein</small></button></div><button id="voice" aria-pressed="false">🎙 Speak Urdu → English</button><p id="heard" dir="auto" hidden></p><p id="status" role="status">Your words, just a little clearer.</p><textarea id="result" aria-label="Suggested message" dir="auto" readonly hidden></textarea><button id="copy" hidden style="width:100%;margin-bottom:8px;border:1px solid #dce6e2;border-radius:10px;padding:9px;background:white;color:#214c3e">Copy message</button><button id="apply" hidden>Use this message ↗</button><p class="foot">Voice uses your browser’s speech service; recognized words go to Google for translation. The mic starts only when you click.</p></section>`;
+  </style><button id="launcher" aria-expanded="false" aria-controls="panel" aria-label="Open writing assistant">✦ ط</button><section id="panel" class="box" hidden aria-label="ط writing assistant"><div class="row"><span class="mark" aria-hidden="true">✦</span><div class="identity"><strong><span lang="ur" dir="rtl">ط</span></strong><span class="tag">A little help with words</span></div><button id="close" aria-label="Close assistant">×</button></div><div id="scratch-area" hidden><label id="scratch-label" for="scratch">Write or speak a message on any page</label><textarea id="scratch" dir="auto" maxlength="3000" placeholder="Type English or Roman Urdu…"></textarea></div><div class="actions"><button id="translate" class="action primary" title="Alt + Shift + E"><span class="symbol" aria-hidden="true">A ↗</span><b>Change to English</b><small>English mein badlein</small></button><button id="roman" class="action" title="Alt + Shift + R"><span class="symbol" aria-hidden="true">اردو</span><b>Roman Urdu</b><small>Roman Urdu mein badlein</small></button><button id="fix" class="action" title="Alt + Shift + F"><span class="symbol" aria-hidden="true">✓</span><b>Fix mistakes</b><small>Isi zubaan mein theek aur behtar karein</small></button></div><button id="voice" aria-pressed="false">🎙 Speak Urdu → English</button><p id="heard" dir="auto" hidden></p><p id="status" role="status">Your words, just a little clearer.</p><textarea id="result" aria-label="Suggested message" dir="auto" readonly hidden></textarea><button id="copy" hidden style="width:100%;margin-bottom:8px;border:1px solid #dce6e2;border-radius:10px;padding:9px;background:white;color:#214c3e">Copy message</button><button id="apply" hidden>Use this message ↗</button><p class="foot">Voice uses your browser’s speech service; recognized words go to Google for translation. The mic starts only when you click.</p></section>`;
   document.documentElement.append(host);
   const $ = id => root.getElementById(id);
   let target = null, snapshot = "", revision = 0, busy = false;
@@ -56,7 +56,7 @@
   function voiceControls(listening) {
     $("voice").textContent = listening ? "■ Stop & translate" : "🎙 Speak Urdu → English";
     $("voice").setAttribute("aria-pressed", String(listening));
-    $("fix").disabled = $("translate").disabled = listening || busy;
+    $("fix").disabled = $("translate").disabled = $("roman").disabled = listening || busy;
   }
   $("voice").onclick = () => {
     if (voiceSession) { stopVoice(false); return; }
@@ -137,7 +137,7 @@
     if (!source.trim() || source.length > 3000) { $("status").textContent = "Enter a message of 1–3,000 characters."; return; }
     reset(); const requestRevision = revision;
     if (spokenText !== null) { $("heard").textContent = spokenText; $("heard").hidden = false; }
-    busy = true; $("voice").disabled = true; $("fix").disabled = $("translate").disabled = true; $("status").textContent = mode === "translate" ? "Finding the right English words…" : "Tidying up spelling and grammar…";
+    busy = true; $("voice").disabled = true; $("fix").disabled = $("translate").disabled = $("roman").disabled = true; $("status").textContent = mode === "translate" ? "Finding the right English words…" : mode === "roman" ? "Roman Urdu mein likh raha hoon…" : "Tidying up spelling and grammar…";
     try {
       const response = await chrome.runtime.sendMessage({ type: "bosscomm.correct", text: source, mode });
       if (revision !== requestRevision || target !== field || !field.isConnected || read(field) !== snapshot) return;
@@ -147,10 +147,11 @@
       $("apply").hidden = field === $("scratch") || response.text === snapshot;
       $("status").textContent = response.text === snapshot ? "Looks good — no changes needed." : "Ready. Review your message below.";
     } catch (error) { if (revision === requestRevision) $("status").textContent = error.message || "Reload this page and try again."; }
-    finally { busy = false; $("voice").disabled = false; $("fix").disabled = $("translate").disabled = false; }
+    finally { busy = false; $("voice").disabled = false; $("fix").disabled = $("translate").disabled = $("roman").disabled = false; }
   };
   $("fix").onclick = () => rewrite("correct");
   $("translate").onclick = () => rewrite("translate");
+  $("roman").onclick = () => rewrite("roman");
   $("apply").onclick = () => {
     const field = target, text = $("result").value;
     if (!field?.isConnected || read(field) !== snapshot || !editable(field)) { reset(); $("status").textContent = "Your draft changed. Check it again."; return; }
@@ -168,6 +169,6 @@
     reset(); $("status").textContent = "Message updated. You’re ready to send.";
   };
   document.addEventListener("keydown", event => {
-    if (event.altKey && event.shiftKey && ["KeyE", "KeyF"].includes(event.code) && !event.isComposing && editable(event.target)) { event.preventDefault(); openPanel(); $(event.code === "KeyE" ? "translate" : "fix").click(); }
+    if (event.altKey && event.shiftKey && ["KeyE", "KeyF", "KeyR"].includes(event.code) && !event.isComposing && editable(event.target)) { event.preventDefault(); openPanel(); $({ KeyE: "translate", KeyF: "fix", KeyR: "roman" }[event.code]).click(); }
   }, true);
 })();

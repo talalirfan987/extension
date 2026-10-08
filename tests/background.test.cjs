@@ -40,10 +40,10 @@ test('incomplete and blocked responses are rejected', async () => {
 test('quota errors are actionable', async () => { assert.match((await setup({ status: 429 }).send('hello')).error, /quota/); });
 
 test('translation and correction have distinct language instructions', async () => {
-  for (const mode of ['translate', 'correct']) {
+  for (const mode of ['translate', 'correct', 'roman']) {
     const h = setup(); await h.send('mai kam kar rha hon', undefined, mode);
     const instruction = JSON.parse(h.calls[0][1].body).systemInstruction.parts[0].text;
-    assert.match(instruction, mode === 'correct' ? /Roman Urdu stays Roman Urdu/ : /into clear, natural English/);
+    assert.match(instruction, mode === 'correct' ? /Roman Urdu stays Roman Urdu/ : mode === 'roman' ? /correct, natural Roman Urdu/ : /into clear, natural English/);
   }
 });
 test('unknown mode never starts a request', async () => {
